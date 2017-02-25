@@ -22,7 +22,7 @@ void *libc;
 
 int main(void)
 {
-    new_puts = real_dlsym(RTLD_NEXT, xorstr("nkjm"));
+    new_puts = real_dlsym(RTLD_NEXT, xorstr("RWVQ"));
     new_puts("Hello!");
 
     return 0;

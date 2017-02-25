@@ -3,6 +3,6 @@
 
 char *xorstr(char *string);
 
-void trimstr(char *string);
+char *trimstr(char *string);
 
 #endif /* misc.h */

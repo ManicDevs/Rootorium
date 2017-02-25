@@ -3,6 +3,7 @@
 #include "include/config.h"
 #include "include/common.h"
 #include "include/dlsym.h"
+#include "include/misc.h"
 
 extern void *libc;
 extern void *_dl_sym(void *, const char *, void *);
