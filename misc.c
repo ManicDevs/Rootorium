@@ -11,6 +11,7 @@ char *xorstr(char *string)
 {
     int i, len = strlen(string);
     uint32_t xorkey = XORKEY;
+
     static char output[] = "";
 
     uint8_t k1 = xorkey & 0xff,

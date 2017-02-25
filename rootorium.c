@@ -17,18 +17,23 @@
 extern char **environ;
 extern void *(*real_dlsym)(void *handle, const char *name);
 
-int (*new_puts)(const char *message);
 void *libc;
 
 int main(void)
 {
-    new_puts = real_dlsym(RTLD_NEXT, xorstr("RWVQ"));
-    new_puts("Hello!");
-
+    printf("Normal Operation!\r\n");
     return 0;
 }
 
-__attribute__((constructor (101))) void anti_tricks(void)
+__attribute__((constructor (101))) void init(void)
+{
+    libc = dlopen(LIBC_PATH, RTLD_LAZY);
+
+    if(!real_dlsym)
+        find_dlsym();
+}
+
+__attribute__((constructor (102))) void anti_tricks(void)
 {
     int i;
     volatile int pt_offset = 0;
@@ -87,13 +92,4 @@ __attribute__((constructor (101))) void anti_tricks(void)
             ");
         } while(1);
     }
-}
-
-__attribute__((constructor (102))) void init_core(void)
-{
-    printf("Normal Operation!\r\n");
-    libc = dlopen(LIBC_PATH, RTLD_LAZY);
-
-    if(!real_dlsym)
-        find_dlsym();
 }
