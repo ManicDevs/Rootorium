@@ -8,12 +8,12 @@ product: rootorium.so rootorium.so.i686
 debug: rootorium.so.dbg rootorium.so.i686.dbg
 
 rootorium.so: rootorium.c
-	gcc -std=gnu99 -O0 -Wall -Wl,--build-id=none -pthread -ldl dlsym.c misc.c rootorium.c -o rootorium.so
-	strip rootorium.so
+	gcc -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl dlsym.c misc.c rootorium.c -o rootorium.so
+	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag --remove-section=.jcr --remove-section=.got.plt --remove-section=.eh_frame --remove-section=.eh_frame_ptr --remove-section=.eh_frame_hdr rootorium.so
 
 rootorium.so.i686: rootorium.c
-	gcc -m32 -std=gnu99 -O0 -Wall -Wl,--build-id=none -pthread -ldl dlsym.c misc.c rootorium.c -o rootorium.so.i686
-	strip rootorium.so.i686
+	gcc -m32 -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl dlsym.c misc.c rootorium.c -o rootorium.so.i686
+	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag --remove-section=.jcr --remove-section=.got.plt --remove-section=.eh_frame --remove-section=.eh_frame_ptr --remove-section=.eh_frame_hdr rootorium.so.i686
 
 rootorium.so.dbg: rootorium.c
 	gcc -std=gnu99 -g -DDEBUG -O0 -Wall -Wl,--build-id=none -pthread -ldl dlsym.c misc.c rootorium.c -o rootorium.so.dbg
