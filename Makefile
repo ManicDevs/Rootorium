@@ -10,25 +10,31 @@ product: rootorium.so rootorium.so.i686
 
 debug: rootorium.so.dbg rootorium.so.i686.dbg
 
-rootorium.so: isrc/rootorium.c
+rootorium.so: src/rootorium.c
 	mkdir -p Release/
-	gcc -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl isrc/dlsym.c isrc/misc.c isrc/rootorium.c -o Release/rootorium.so
+	touch Release/.gitignore
+	gcc -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl src/dlsym.c src/misc.c src/rootorium.c -o Release/rootorium.so
 	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag --remove-section=.jcr --remove-section=.got.plt --remove-section=.eh_frame --remove-section=.eh_frame_ptr --remove-section=.eh_frame_hdr Release/rootorium.so
 
-rootorium.so.i686: isrc/rootorium.c
+rootorium.so.i686: src/rootorium.c
 	mkdir -p Release/
-	gcc -m32 -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl isrc/dlsym.c isrc/misc.c isrc/rootorium.c -o Release/rootorium.so.i686
+	touch Release/.gitignore
+	gcc -m32 -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl src/dlsym.c src/misc.c src/rootorium.c -o Release/rootorium.so.i686
 	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag --remove-section=.jcr --remove-section=.got.plt --remove-section=.eh_frame --remove-section=.eh_frame_ptr --remove-section=.eh_frame_hdr Release/rootorium.so.i686
 
-rootorium.so.dbg: isrc/rootorium.c
+rootorium.so.dbg: src/rootorium.c
 	mkdir -p Debug
-	gcc -std=gnu99 -g -DDEBUG -O0 -Wall -Wl,--build-id=none -pthread -ldl isrc/dlsym.c isrc/misc.c isrc/rootorium.c -o Debug/rootorium.so.dbg
+	touch Debug/.gitignore
+	gcc -std=gnu99 -g -DDEBUG -O0 -Wall -Wl,--build-id=none -pthread -ldl src/dlsym.c src/misc.c src/rootorium.c -o Debug/rootorium.so.dbg
 
-rootorium.so.i686.dbg: isrc/rootorium.c
+rootorium.so.i686.dbg: src/rootorium.c
 	mkdir -p Debug
-	gcc -m32 -std=gnu99 -g -DDEBUG -O0 -Wall -Wl,--build-id=none -pthread -ldl isrc/dlsym.c isrc/misc.c isrc/rootorium.c -o Debug/rootorium.so.i686.dbg
+	touch Debug/.gitignore
+	gcc -m32 -std=gnu99 -g -DDEBUG -O0 -Wall -Wl,--build-id=none -pthread -ldl src/dlsym.c src/misc.c src/rootorium.c -o Debug/rootorium.so.i686.dbg
 
 clean:
 	cd kern_mod && make clean
-	rm -rf Release/
-	rm -rf Debug/
+	rm -f Release/*
+	rm -f Debug/*
+	touch Release/.gitignore
+	touch Debug/.gitignore
