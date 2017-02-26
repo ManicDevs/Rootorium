@@ -1,8 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define DEBUG 1
-
 #define XORKEY          (uint32_t)0xdeadbeef;
 
 #define LIBC_PATH       "/lib/x86_64-linux-gnu/libc.so.6"
