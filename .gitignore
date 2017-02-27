@@ -1,2 +1,8 @@
+kern_mod/*.o
+kern_mod/*.cmd
+kern_mod/*.symvers
+kern_mod/*.order
+kern_mod/*.mod.*
+kern_mod/.tmp_versions
 Release/
 Debug/
