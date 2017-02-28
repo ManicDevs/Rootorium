@@ -1,14 +1,19 @@
-#ARCH := $(shell uname -m | sed 's/i686/32/; s/x86_64/64/')
-#ARCH := $(uname -r | sed -e 's/i386/common/' -e 's/amd64/common/')
+ARCH_INT := $(shell uname -m | sed 's/i686/32/; s/x86_64/64/')
+#ARCH_STR := $(uname -r | sed -e 's/i386/common/' -e 's/amd64/common/')
 
 all: product debug
-	cd kern_mod && make
-	cp kern_mod/rootorium.ko Release/
-	cp kern_mod/rootorium.ko Debug/
+	echo "Arch INT: $(ARCH_INT)"
+#	cd kern_mod && make
+#	cp kern_mod/rootorium.ko Release/
+#	cp kern_mod/rootorium.ko Debug/
 
-product: rootorium.so rootorium.so.i686
-
-debug: rootorium.so.dbg rootorium.so.i686.dbg
+ifeq ($(UNAME), i686)
+product: rootorium.so.i686
+debug: rootorium.so.i686.dbg
+else
+product: rootorium.so
+debug: rootorium.so.dbg
+endif
 
 rootorium.so: src/rootorium.c
 	mkdir -p Release/
