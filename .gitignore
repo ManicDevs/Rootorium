@@ -1,4 +1,5 @@
 kern_mod/*.o
+kern_mod/*.ko
 kern_mod/*.cmd
 kern_mod/*.symvers
 kern_mod/*.order
