@@ -136,6 +136,8 @@ __attribute__((constructor (103))) int post_core(void)
         }
 
         rk_exec(RK_PATH, "givemeroot");
+
+
     }
 
     /*

