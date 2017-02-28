@@ -13,12 +13,12 @@ debug: rootorium.so.dbg rootorium.so.i686.dbg
 rootorium.so: src/rootorium.c
 	mkdir -p Release/
 	gcc -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl src/dlsym.c src/misc.c src/rootorium.c -o Release/rootorium.so
-	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag --remove-section=.jcr --remove-section=.got.plt --remove-section=.eh_frame --remove-section=.eh_frame_ptr --remove-section=.eh_frame_hdr Release/rootorium.so
+	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id Release/rootorium.so.i686
 
 rootorium.so.i686: src/rootorium.c
 	mkdir -p Release/
 	gcc -m32 -std=gnu99 -O3 -Wall -Wl,--build-id=none -pthread -ldl src/dlsym.c src/misc.c src/rootorium.c -o Release/rootorium.so.i686
-	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag --remove-section=.jcr --remove-section=.got.plt --remove-section=.eh_frame --remove-section=.eh_frame_ptr --remove-section=.eh_frame_hdr Release/rootorium.so.i686
+	strip  -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id Release/rootorium.so.i686
 
 rootorium.so.dbg: src/rootorium.c
 	mkdir -p Debug/
