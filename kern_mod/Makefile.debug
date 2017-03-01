@@ -1,6 +1,6 @@
 PROJECT = rootorium
 
-CFLAGS = -DDEBUG
+CFLAGS = -DDEBUG -O0 -Wall -Wl,--build-id=none
 
 obj-m += $(PROJECT).o
 

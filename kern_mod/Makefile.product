@@ -1,6 +1,6 @@
 PROJECT = rootorium
 
-CFLAGS =
+CFLAGS = -O3 -Wall -Wl,--build-id=none
 
 obj-m += $(PROJECT).o
 
