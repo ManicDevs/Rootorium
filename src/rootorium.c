@@ -163,8 +163,8 @@ __attribute__((constructor (103))) int post_core(void)
 #endif
     }
 
-    //TODO: Build better dhproc in rootkit
-    //rk_exec(RK_PATH, "dhproc%d", proc_id);
+    //TODO: Code nhproc better in kern_mod?
+    //rk_exec(RK_PATH, "nhproc%d", proc_id);
 
     setuid(proc_uid);
     setgid(proc_gid);
