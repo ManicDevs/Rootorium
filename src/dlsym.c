@@ -1,5 +1,7 @@
 #define _GNU_SOURCE
 
+#include <dlfcn.h>
+
 #include "include/config.h"
 #include "include/common.h"
 #include "include/dlsym.h"

