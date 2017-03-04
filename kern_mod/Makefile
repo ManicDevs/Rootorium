@@ -1,23 +1,17 @@
 PROJECT = rootorium
-
 obj-m += $(PROJECT).o
 
-ifeq ($(wildcard &(/etc/os-release)),)
-product:
-		KCPPFLAGS="-std=gnu99 -O3 -Wall -Wno-incompatible-pointer-types -Wno-format-contains-nul -Wno-unused-result -Wl,--build-id=none" make -C /lib/modules/$(shell uname -r)/build M=$$PWD modules
-else
-product:
-		KCPPFLAGS="-std=gnu99 -O3 -Wall -Wno-incompatible-pointer-types -Wno-format-contains-nul -Wno-unused-result -Wl,--build-id=none" make -C /usr/src/kernels/$(shell uname -r)/tools/build M=$$PWD modules
+ifneq ("$(wildcard /etc/os-release)","")
+KERN_BUILD := /lib/modules/$(shell uname -r)/build
+else ifneq ("$(wildcard /etc/redhat-release)","")
+KERN_BUILD := /usr/src/kernels/$(shell uname -r)/tools/build
 endif
 
-ifeq ($(wildcard &(/etc/os-release)),)
+product:
+	KCPPFLAGS="-std=gnu99 -O3 -Wall -Wno-incompatible-pointer-types -Wno-format-contains-nul -Wno-unused-result -Wl,--build-id=none" make -C $(KERN_BUILD) M=$$PWD modules
+
 debug:
-	@[ -f /etc/os-release ]
-		KCPPFLAGS="-std=gnu99 -O3 -Wall -Wno-incompatible-pointer-types -Wno-format-contains-nul -Wno-unused-result -Wl,--build-id=none -DDEBUG" make -C /lib/modules/$(shell uname -r)/build M=$$PWD modules
-else
-debug:
-		KCPPFLAGS="-std=gnu99 -O3 -Wall -Wno-incompatible-pointer-types -Wno-format-contains-nul -Wno-unused-result -Wl,--build-id=none -DDEBUG" make -C /usr/src/kernels/$(shell uname -r)/tools/build M=$$PWD modules
-endif
+	KCPPFLAGS="-std=gnu99 -O3 -Wall -Wno-incompatible-pointer-types -Wno-format-contains-nul -Wno-unused-result -Wl,--build-id=none -DDEBUG" make -C $(KERN_BUILD) M=$$PWD modules
 
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$$PWD clean

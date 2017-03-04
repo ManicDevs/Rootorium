@@ -3,7 +3,7 @@ ARCH_INT := $(shell uname -m | sed 's/i686/32/; s/x86_64/64/')
 
 all: product debug
 
-ifeq ($(UNAME), i686)
+ifeq ($(ARCH_INT), i686)
 product: rootorium.so.i686
 	cd kern_mod && make product
 	cp kern_mod/rootorium.ko Release/rootorium.ko
