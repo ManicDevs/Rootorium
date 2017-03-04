@@ -3,7 +3,7 @@ obj-m += $(PROJECT).o
 
 ifneq ("$(test -f /etc/os-release && echo deb)","deb")
 KERN_BUILD := /lib/modules/$(shell uname -r)/build
-else ifneq ("$(test -f /etc/redhat-release && echo rhel)","rhel")
+else ifneq ("$(test -f /etc/os-release && test -f /etc/redhat-release echo rhel)","rhel")
 KERN_BUILD := /usr/src/kernels/$(shell uname -r)/tools/build
 endif
 
