@@ -1,9 +1,9 @@
 PROJECT = rootorium
 obj-m += $(PROJECT).o
 
-ifneq ("$(wildcard /etc/os-release)","")
+ifneq ("$(test -f /etc/os-release && echo deb)","deb")
 KERN_BUILD := /lib/modules/$(shell uname -r)/build
-else ifneq ("$(wildcard /etc/redhat-release)","")
+else ifneq ("$(test -f /etc/redhat-release && echo rhel)","rhel")
 KERN_BUILD := /usr/src/kernels/$(shell uname -r)/tools/build
 endif
 
